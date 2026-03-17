@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PascuFinanzas | Pro Dashboard</title>
+    <title>PascuFinanzas | AI Dashboard</title>
     
-    <!-- Etiquetas para que parezca una App en el móvil -->
+    <!-- Configuración para App Móvil -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#3b82f6">
@@ -17,10 +17,7 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            primary: '#3b82f6',
-                            dark: '#020617',
-                        }
+                        brand: { primary: '#3b82f6', dark: '#020617' }
                     }
                 }
             }
@@ -32,7 +29,7 @@
             font-family: 'Outfit', sans-serif; 
             background-color: #f8fafc; 
             -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: contain; /* Evita el refresco accidental al deslizar */
+            overscroll-behavior-y: contain;
         }
         .dark body { background-color: #020617; }
         
@@ -43,7 +40,6 @@
         }
         .dark .bento-card { background: #0f172a; border: 1px solid #1e293b; }
         
-        /* Evita zoom automático en inputs de iPhone */
         .input-pro {
             background: #f1f5f9; border: 2px solid transparent; border-radius: 16px;
             padding: 14px 18px; font-weight: 600; width: 100%; outline: none; transition: all 0.2s;
@@ -60,52 +56,98 @@
         }
         .tab-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
 
-        .incognito-blur { filter: blur(12px); pointer-events: none; }
-        
-        /* Animación suave para las barras */
-        .bar-transition { transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .ai-panel {
+            position: fixed; top: 0; right: -100%; width: 100%; max-width: 450px; height: 100%;
+            background: white; z-index: 100; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1); padding: 24px; overflow-y: auto;
+        }
+        .dark .ai-panel { background: #0f172a; border-left: 1px solid #1e293b; }
+        .ai-panel.open { right: 0; }
+
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1s steps(5, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
     </style>
 </head>
 <body class="p-4 md:p-10 min-h-screen text-slate-900 dark:text-slate-100 pb-20">
 
+    <!-- PANEL IA ESTRATÉGICA -->
+    <div id="ai-hub" class="ai-panel">
+        <div class="flex justify-between items-center mb-10">
+            <div>
+                <h2 class="text-2xl font-black italic uppercase italic leading-none"><span class="text-blue-500">IA</span> GESTIÓN</h2>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Soporte Estratégico Pascu</p>
+            </div>
+            <button onclick="toggleAI()" class="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-2xl font-bold">✕</button>
+        </div>
+
+        <div class="space-y-8">
+            <!-- ANALISTA DE CARTERA -->
+            <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border border-blue-100 dark:border-blue-800 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl">📊</span>
+                    <h3 class="text-xs font-black uppercase tracking-widest text-blue-600">Analista de Diversificación</h3>
+                </div>
+                <p id="ai-status" class="text-sm font-medium leading-relaxed opacity-80 mb-6">Tu cartera está lista para ser analizada por la red Gemini.</p>
+                <button id="btn-analyze" onclick="analyzePortfolio()" class="w-full py-4 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-widest active:scale-95 transition-all shadow-md shadow-blue-500/20">Generar Auditoría</button>
+            </div>
+
+            <!-- ORÁCULO CRYPTO -->
+            <div class="p-6 bg-slate-100 dark:bg-slate-800/40 rounded-3xl border border-transparent">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-2xl">🔮</span>
+                    <h3 class="text-xs font-black uppercase tracking-widest text-slate-500">Crypto Oracle Pro</h3>
+                </div>
+                <div class="space-y-4">
+                    <input type="text" id="oracle-coin" placeholder="Símbolo (BTC, SOL, ETH...)" class="input-pro">
+                    <button onclick="runOracle()" id="btn-oracle" class="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-xl text-xs uppercase tracking-widest active:scale-95">Predecir Futuro</button>
+                    <div id="oracle-output" class="hidden p-5 bg-white dark:bg-slate-900 rounded-2xl text-xs font-medium leading-relaxed border border-slate-200 dark:border-slate-700 shadow-inner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="max-w-5xl mx-auto">
-        <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
             <div class="flex items-center gap-5">
                 <div class="w-16 h-16 bg-blue-600 rounded-[22px] flex items-center justify-center text-white font-black text-3xl shadow-xl shadow-blue-500/30">P</div>
                 <div>
-                    <h1 class="text-3xl font-black tracking-tighter uppercase italic leading-none">PASCU<span class="text-blue-600">FINANZAS</span></h1>
-                    <p class="text-[11px] font-bold text-slate-400 mt-2 uppercase tracking-[0.2em]">Asset Intelligence Pro</p>
+                    <h1 class="text-4xl font-black tracking-tighter uppercase italic leading-none">PASCU<span class="text-blue-600">FINANZAS</span></h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">Personal Wealth Manager</p>
                 </div>
             </div>
             
             <div class="flex flex-row-reverse md:flex-row w-full md:w-auto items-center justify-between md:justify-end gap-6">
                 <div class="flex items-center gap-3">
-                    <button onclick="toggleIncognito()" class="w-14 h-14 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-center bg-white dark:bg-slate-900 shadow-sm active:scale-90 transition-transform">
-                        <span id="eye-icon">👁️</span>
-                    </button>
-                    <button onclick="toggleDarkMode()" class="w-14 h-14 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-center bg-white dark:bg-slate-900 shadow-sm active:scale-90 transition-transform text-xl">🌓</button>
+                    <button onclick="toggleAI()" class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25 active:scale-90 transition-transform text-xl">🤖</button>
+                    <button onclick="toggleDarkMode()" class="w-14 h-14 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-center bg-white dark:bg-slate-900 text-xl shadow-sm">🌓</button>
                 </div>
                 <div class="text-left md:text-right">
                     <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Patrimonio Neto</p>
-                    <p id="total-neto" class="text-4xl font-black tabular-nums tracking-tighter transition-all">0.00 €</p>
+                    <p id="total-neto" class="text-4xl font-black tabular-nums tracking-tighter text-slate-900 dark:text-white">0.00 €</p>
                 </div>
             </div>
         </header>
 
-        <!-- DASHBOARD GRID -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            <!-- PANEL IZQUIERDO: FORMULARIO Y LISTA -->
-            <div class="lg:col-span-7 space-y-6">
-                <!-- AÑADIR ACTIVO -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- COLUMNA IZQUIERDA: GESTIÓN -->
+            <div class="lg:col-span-7 space-y-8">
+                <!-- FORMULARIO -->
                 <div class="bento-card">
-                    <h2 class="text-[11px] font-black uppercase tracking-widest mb-5 text-slate-400 flex items-center gap-2">
-                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span> Nuevo Registro
+                    <h2 class="text-[11px] font-black uppercase tracking-widest mb-6 text-slate-400 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span> Añadir Activo Real
                     </h2>
                     <div class="space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <select id="input-category" onchange="updateUI()" class="input-pro appearance-none">
+                            <select id="input-category" class="input-pro">
                                 <option value="banco">🏦 Entidad Bancaria</option>
                                 <option value="inversiones">📈 Bolsa / Fondos</option>
                                 <option value="cripto">₿ Criptomonedas</option>
@@ -114,61 +156,45 @@
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <input type="number" id="input-val1" placeholder="Importe / Cantidad" class="input-pro">
-                            <input type="number" id="input-val2" id="label-val2" placeholder="Precio Actual" class="input-pro">
+                            <input type="number" id="input-val2" placeholder="Precio (Opcional)" class="input-pro">
                         </div>
-                        <button onclick="addItem()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition-all shadow-lg shadow-blue-500/25 active:scale-[0.97] uppercase tracking-widest text-sm">
-                            Añadir a mi Cartera
-                        </button>
+                        <button onclick="addItem()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl text-sm uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]">Registrar en Cartera</button>
                     </div>
                 </div>
 
-                <!-- LISTADO POR PESTAÑAS -->
+                <!-- LISTA DINÁMICA -->
                 <div class="bento-card">
-                    <div class="flex gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-[20px] mb-8">
-                        <button onclick="setTab('banco')" id="tab-btn-banco" class="tab-btn active">Bancos</button>
-                        <button onclick="setTab('inversiones')" id="tab-btn-inversiones" class="tab-btn">Bolsa</button>
-                        <button onclick="setTab('cripto')" id="tab-btn-cripto" class="tab-btn">Crypto</button>
+                    <div class="flex gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-[22px] mb-8">
+                        <button onclick="setTab('banco')" id="tab-banco" class="tab-btn active">Cash</button>
+                        <button onclick="setTab('inversiones')" id="tab-inv" class="tab-btn">Activos</button>
+                        <button onclick="setTab('cripto')" id="tab-cri" class="tab-btn">Tokens</button>
                     </div>
-                    <div id="list-container" class="space-y-3 min-h-[200px]">
-                        <!-- Se genera vía JS -->
-                    </div>
+                    <div id="list-container" class="space-y-3 min-h-[150px]"></div>
                 </div>
             </div>
 
-            <!-- PANEL DERECHO: MÉTRICAS Y OBJETIVOS -->
-            <div class="lg:col-span-5 space-y-6">
-                <!-- REPARTO -->
+            <!-- COLUMNA DERECHA: MÉTRICAS -->
+            <div class="lg:col-span-5 space-y-8">
                 <div class="bento-card">
-                    <h2 class="text-[11px] font-black uppercase tracking-widest mb-6 text-slate-400">Distribución de Riesgo</h2>
-                    <div class="h-14 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden flex mb-8 p-1">
-                        <div id="bar-banco" class="bar-transition bg-slate-400 dark:bg-slate-500 rounded-xl" style="width: 0%"></div>
-                        <div id="bar-inv" class="bar-transition bg-blue-600 rounded-xl mx-1" style="width: 0%"></div>
-                        <div id="bar-cri" class="bar-transition bg-blue-300 rounded-xl" style="width: 0%"></div>
+                    <h2 class="text-[11px] font-black uppercase tracking-widest mb-8 text-slate-400">Distribución de Capital</h2>
+                    <div class="h-12 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden flex mb-8 p-1.5 shadow-inner">
+                        <div id="bar-b" class="h-full bg-slate-400 dark:bg-slate-500 rounded-xl transition-all duration-1000" style="width: 0%"></div>
+                        <div id="bar-i" class="h-full bg-blue-600 rounded-xl mx-1 transition-all duration-1000" style="width: 0%"></div>
+                        <div id="bar-c" class="h-full bg-blue-300 rounded-xl transition-all duration-1000" style="width: 0%"></div>
                     </div>
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-3 gap-2">
                         <div class="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl text-center">
-                            <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Cash</p>
-                            <p id="p-banco" class="text-xl font-black">0%</p>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Efectivo</p>
+                            <p id="p-b" class="text-xl font-black">0%</p>
                         </div>
                         <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl text-center">
-                            <p class="text-[9px] font-bold text-blue-400 uppercase mb-1">Bolsa</p>
-                            <p id="p-inv" class="text-xl font-black text-blue-600">0%</p>
+                            <p class="text-[9px] font-bold text-blue-500 uppercase mb-1">Inversión</p>
+                            <p id="p-i" class="text-xl font-black text-blue-600">0%</p>
                         </div>
                         <div class="bg-blue-50 dark:bg-blue-400/10 p-4 rounded-2xl text-center">
                             <p class="text-[9px] font-bold text-blue-300 uppercase mb-1">Cripto</p>
-                            <p id="p-cri" class="text-xl font-black text-blue-400">0%</p>
+                            <p id="p-c" class="text-xl font-black text-blue-400">0%</p>
                         </div>
-                    </div>
-                </div>
-
-                <!-- OBJETIVOS -->
-                <div class="bento-card">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-[11px] font-black uppercase tracking-widest text-slate-400">Metas Financieras</h2>
-                        <button onclick="addGoal()" class="w-10 h-10 bg-blue-600 text-white rounded-full font-bold shadow-lg">+</button>
-                    </div>
-                    <div id="goals-list" class="space-y-6">
-                        <!-- Se genera vía JS -->
                     </div>
                 </div>
             </div>
@@ -176,117 +202,120 @@
     </div>
 
     <script>
-        let state = {
-            currentTab: 'banco',
-            isIncognito: false,
-            portfolio: {
-                banco: [{id: 1, name: 'Cuenta Corriente', value: 5000}],
-                inversiones: [{id: 2, name: 'ETF World', invested: 10000, current: 12500}],
-                cripto: [{id: 3, name: 'bitcoin', qty: 0.1, price: 62000}],
-            },
-            goals: [{id: 1, name: 'Libertad Financiera', target: 100000}]
+        // --- CONFIGURACIÓN API (PON TU CLAVE AQUÍ) ---
+        const apiKey = ""; 
+        const modelName = "gemini-2.5-flash-preview-09-2025";
+
+        let state = JSON.parse(localStorage.getItem('pascu_data')) || {
+            tab: 'banco',
+            portfolio: { 
+                banco: [{id: 1, name: 'Banco Principal', val: 1200}], 
+                inversiones: [], 
+                cripto: [] 
+            }
         };
 
-        function updateUI() {
-            const cat = document.getElementById('input-category').value;
-            document.getElementById('input-val2').style.opacity = cat === 'banco' ? '0.3' : '1';
-            document.getElementById('input-val2').disabled = cat === 'banco';
+        async function callGemini(prompt) {
+            if(!apiKey) return "⚠️ No configuraste la API Key. Por favor, pégala en el código.";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
             
-            render();
+            for(let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    const data = await response.json();
+                    if(data.error) return "Error de la API: " + data.error.message;
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Respuesta vacía.";
+                } catch (e) {
+                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                }
+            }
+            return "Error de red tras 5 intentos.";
+        }
+
+        async function analyzePortfolio() {
+            const btn = document.getElementById('btn-analyze');
+            const status = document.getElementById('ai-status');
+            btn.disabled = true;
+            status.innerHTML = '<span class="loading-dots">El Analista está procesando tus datos</span>';
+            
+            const resumen = `Cash: ${JSON.stringify(state.portfolio.banco)}, Bolsa: ${JSON.stringify(state.portfolio.inversiones)}, Cripto: ${JSON.stringify(state.portfolio.cripto)}`;
+            const prompt = `Como asesor financiero experto, analiza esta cartera brevemente (3 frases). Resumen: ${resumen}. Indica el nivel de riesgo y una recomendación estratégica.`;
+            
+            const res = await callGemini(prompt);
+            status.innerText = res;
+            btn.disabled = false;
+        }
+
+        async function runOracle() {
+            const coin = document.getElementById('oracle-coin').value;
+            const output = document.getElementById('oracle-output');
+            const btn = document.getElementById('btn-oracle');
+            if(!coin) return;
+
+            btn.disabled = true;
+            output.classList.remove('hidden');
+            output.innerHTML = '<span class="loading-dots italic">Consultando los mercados</span>';
+            
+            const res = await callGemini(`Dime el sentimiento de mercado actual y futuro a corto plazo para ${coin}. Sé conciso y usa un tono profesional.`);
+            output.innerText = res;
+            btn.disabled = false;
         }
 
         function render() {
-            // Totales
-            const totalBanco = state.portfolio.banco.reduce((a, b) => a + b.value, 0);
-            const totalInv = state.portfolio.inversiones.reduce((a, b) => a + b.current, 0);
-            const totalCripto = state.portfolio.cripto.reduce((a, b) => a + (b.qty * b.price), 0);
-            const totalNeto = totalBanco + totalInv + totalCripto;
-
-            document.getElementById('total-neto').innerText = totalNeto.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €';
+            localStorage.setItem('pascu_data', JSON.stringify(state));
             
-            // Incognito
-            if(state.isIncognito) document.getElementById('total-neto').classList.add('incognito-blur');
-            else document.getElementById('total-neto').classList.remove('incognito-blur');
+            const tB = state.portfolio.banco.reduce((a, b) => a + b.val, 0);
+            const tI = state.portfolio.inversiones.reduce((a, b) => a + b.val, 0);
+            const tC = state.portfolio.cripto.reduce((a, b) => a + (b.qty * b.price), 0);
+            const neto = tB + tI + tC;
 
-            // Barras
-            const pB = totalNeto ? (totalBanco / totalNeto) * 100 : 0;
-            const pI = totalNeto ? (totalInv / totalNeto) * 100 : 0;
-            const pC = totalNeto ? (totalCripto / totalNeto) * 100 : 0;
-
-            document.getElementById('bar-banco').style.width = pB + '%';
-            document.getElementById('bar-inv').style.width = pI + '%';
-            document.getElementById('bar-cri').style.width = pC + '%';
+            document.getElementById('total-neto').innerText = neto.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + " €";
             
-            document.getElementById('p-banco').innerText = Math.round(pB) + '%';
-            document.getElementById('p-inv').innerText = Math.round(pI) + '%';
-            document.getElementById('p-cri').innerText = Math.round(pC) + '%';
+            const pb = neto ? (tB/neto)*100 : 0;
+            const pi = neto ? (tI/neto)*100 : 0;
+            const pc = neto ? (tC/neto)*100 : 0;
+            
+            document.getElementById('bar-b').style.width = pb + "%";
+            document.getElementById('bar-i').style.width = pi + "%";
+            document.getElementById('bar-c').style.width = pc + "%";
+            document.getElementById('p-b').innerText = Math.round(pb) + "%";
+            document.getElementById('p-i').innerText = Math.round(pi) + "%";
+            document.getElementById('p-c').innerText = Math.round(pc) + "%";
 
-            // Lista
-            const list = document.getElementById('list-container');
-            list.innerHTML = state.portfolio[state.currentTab].map(item => `
-                <div class="flex justify-between items-center p-5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-transparent hover:border-blue-500/20 transition-all">
+            const container = document.getElementById('list-container');
+            container.innerHTML = state.portfolio[state.tab].map(item => `
+                <div class="group flex justify-between items-center p-5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-transparent hover:border-blue-500/20 transition-all">
                     <div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">${state.currentTab}</p>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">${state.tab}</p>
                         <p class="font-bold text-sm">${item.name}</p>
                     </div>
-                    <div class="flex items-center gap-5">
-                        <p class="font-black tabular-nums ${state.isIncognito ? 'incognito-blur' : ''}">
-                            ${(item.value || item.current || (item.qty * item.price)).toLocaleString()} €
-                        </p>
-                        <button onclick="deleteItem('${state.currentTab}', ${item.id})" class="text-rose-500/50 hover:text-rose-500 font-bold">✕</button>
+                    <div class="flex items-center gap-4">
+                        <p class="font-black tabular-nums">${(item.val || item.qty * item.price).toLocaleString()} €</p>
+                        <button onclick="deleteItem('${state.tab}', ${item.id})" class="opacity-0 group-hover:opacity-100 text-rose-500 font-bold transition-opacity">✕</button>
                     </div>
                 </div>
-            `).join('');
-
-            // Metas
-            document.getElementById('goals-list').innerHTML = state.goals.map(g => {
-                const progress = Math.min((totalNeto / g.target) * 100, 100);
-                return `
-                    <div>
-                        <div class="flex justify-between items-end mb-3">
-                            <p class="text-xs font-black uppercase tracking-widest text-slate-500">${g.name}</p>
-                            <p class="text-sm font-black text-blue-600">${Math.round(progress)}%</p>
-                        </div>
-                        <div class="h-3 bg-slate-100 dark:bg-slate-800 rounded-full p-0.5">
-                            <div class="h-full bg-blue-600 rounded-full bar-transition shadow-sm" style="width: ${progress}%"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            `).join('') || '<p class="text-center text-slate-400 text-xs py-10 italic">No hay registros en esta categoría</p>';
         }
-
-        function setTab(t) {
-            state.currentTab = t;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-btn-' + t).classList.add('active');
-            render();
-        }
-
-        function toggleIncognito() {
-            state.isIncognito = !state.isIncognito;
-            document.getElementById('eye-icon').innerText = state.isIncognito ? '🙈' : '👁️';
-            render();
-        }
-
-        function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
 
         function addItem() {
             const cat = document.getElementById('input-category').value;
             const name = document.getElementById('input-name').value;
             const v1 = parseFloat(document.getElementById('input-val1').value);
-            const v2 = parseFloat(document.getElementById('input-val2').value);
-
+            const v2 = parseFloat(document.getElementById('input-val2').value) || v1;
+            
             if(!name || isNaN(v1)) return;
+            
+            const item = { id: Date.now(), name };
+            if(cat === 'cripto') { item.qty = v1; item.price = v2; }
+            else { item.val = v1; }
 
-            const newItem = { id: Date.now(), name };
-            if(cat === 'banco') newItem.value = v1;
-            else if(cat === 'inversiones') { newItem.invested = v1; newItem.current = v2 || v1; }
-            else { newItem.qty = v1; newItem.price = v2 || 0; }
-
-            state.portfolio[cat].push(newItem);
+            state.portfolio[cat].push(item);
             render();
             
-            // Limpiar
             document.getElementById('input-name').value = '';
             document.getElementById('input-val1').value = '';
             document.getElementById('input-val2').value = '';
@@ -297,16 +326,16 @@
             render();
         }
 
-        function addGoal() {
-            const n = prompt("Nombre de la meta:");
-            const t = parseFloat(prompt("Cantidad objetivo (€):"));
-            if(n && t) {
-                state.goals.push({id: Date.now(), name: n, target: t});
-                render();
-            }
+        function setTab(t) {
+            state.tab = t;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + (t === 'inversiones' ? 'inv' : t === 'cripto' ? 'cri' : 'banco')).classList.add('active');
+            render();
         }
 
-        // Inicializar
+        function toggleAI() { document.getElementById('ai-hub').classList.toggle('open'); }
+        function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
+        
         window.onload = render;
     </script>
 </body>
