@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>PascuFinanzas | Pro Dashboard</title>
+    
+    <!-- Etiquetas para que parezca una App en el móvil -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#3b82f6">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#3b82f6',
+                            dark: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background-color: #f8fafc; 
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: contain; /* Evita el refresco accidental al deslizar */
+        }
+        .dark body { background-color: #020617; }
+        
+        .bento-card { 
+            background: white; border-radius: 28px; padding: 24px;
+            box-shadow: 0 4px 25px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid #f1f5f9;
+        }
+        .dark .bento-card { background: #0f172a; border: 1px solid #1e293b; }
+        
+        /* Evita zoom automático en inputs de iPhone */
+        .input-pro {
+            background: #f1f5f9; border: 2px solid transparent; border-radius: 16px;
+            padding: 14px 18px; font-weight: 600; width: 100%; outline: none; transition: all 0.2s;
+            font-size: 16px; 
+        }
+        .dark .input-pro { background: #1e293b; color: white; }
+        .input-pro:focus { border-color: #3b82f6; background: white; }
+
+        .tab-btn { 
+            flex: 1; text-align: center;
+            padding: 12px 6px; border-radius: 14px; font-weight: 700; font-size: 12px; 
+            color: #64748b; transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        .tab-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+
+        .incognito-blur { filter: blur(12px); pointer-events: none; }
+        
+        /* Animación suave para las barras */
+        .bar-transition { transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    </style>
+</head>
+<body class="p-4 md:p-10 min-h-screen text-slate-900 dark:text-slate-100 pb-20">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- HEADER -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+            <div class="flex items-center gap-5">
+                <div class="w-16 h-16 bg-blue-600 rounded-[22px] flex items-center justify-center text-white font-black text-3xl shadow-xl shadow-blue-500/30">P</div>
+                <div>
+                    <h1 class="text-3xl font-black tracking-tighter uppercase italic leading-none">PASCU<span class="text-blue-600">FINANZAS</span></h1>
+                    <p class="text-[11px] font-bold text-slate-400 mt-2 uppercase tracking-[0.2em]">Asset Intelligence Pro</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-row-reverse md:flex-row w-full md:w-auto items-center justify-between md:justify-end gap-6">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleIncognito()" class="w-14 h-14 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-center bg-white dark:bg-slate-900 shadow-sm active:scale-90 transition-transform">
+                        <span id="eye-icon">👁️</span>
+                    </button>
+                    <button onclick="toggleDarkMode()" class="w-14 h-14 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-center bg-white dark:bg-slate-900 shadow-sm active:scale-90 transition-transform text-xl">🌓</button>
+                </div>
+                <div class="text-left md:text-right">
+                    <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Patrimonio Neto</p>
+                    <p id="total-neto" class="text-4xl font-black tabular-nums tracking-tighter transition-all">0.00 €</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- PANEL IZQUIERDO: FORMULARIO Y LISTA -->
+            <div class="lg:col-span-7 space-y-6">
+                <!-- AÑADIR ACTIVO -->
+                <div class="bento-card">
+                    <h2 class="text-[11px] font-black uppercase tracking-widest mb-5 text-slate-400 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span> Nuevo Registro
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <select id="input-category" onchange="updateUI()" class="input-pro appearance-none">
+                                <option value="banco">🏦 Entidad Bancaria</option>
+                                <option value="inversiones">📈 Bolsa / Fondos</option>
+                                <option value="cripto">₿ Criptomonedas</option>
+                            </select>
+                            <input type="text" id="input-name" placeholder="Nombre (Ej: MyInvestor)" class="input-pro">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" id="input-val1" placeholder="Importe / Cantidad" class="input-pro">
+                            <input type="number" id="input-val2" id="label-val2" placeholder="Precio Actual" class="input-pro">
+                        </div>
+                        <button onclick="addItem()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition-all shadow-lg shadow-blue-500/25 active:scale-[0.97] uppercase tracking-widest text-sm">
+                            Añadir a mi Cartera
+                        </button>
+                    </div>
+                </div>
+
+                <!-- LISTADO POR PESTAÑAS -->
+                <div class="bento-card">
+                    <div class="flex gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-[20px] mb-8">
+                        <button onclick="setTab('banco')" id="tab-btn-banco" class="tab-btn active">Bancos</button>
+                        <button onclick="setTab('inversiones')" id="tab-btn-inversiones" class="tab-btn">Bolsa</button>
+                        <button onclick="setTab('cripto')" id="tab-btn-cripto" class="tab-btn">Crypto</button>
+                    </div>
+                    <div id="list-container" class="space-y-3 min-h-[200px]">
+                        <!-- Se genera vía JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL DERECHO: MÉTRICAS Y OBJETIVOS -->
+            <div class="lg:col-span-5 space-y-6">
+                <!-- REPARTO -->
+                <div class="bento-card">
+                    <h2 class="text-[11px] font-black uppercase tracking-widest mb-6 text-slate-400">Distribución de Riesgo</h2>
+                    <div class="h-14 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden flex mb-8 p-1">
+                        <div id="bar-banco" class="bar-transition bg-slate-400 dark:bg-slate-500 rounded-xl" style="width: 0%"></div>
+                        <div id="bar-inv" class="bar-transition bg-blue-600 rounded-xl mx-1" style="width: 0%"></div>
+                        <div id="bar-cri" class="bar-transition bg-blue-300 rounded-xl" style="width: 0%"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl text-center">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Cash</p>
+                            <p id="p-banco" class="text-xl font-black">0%</p>
+                        </div>
+                        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl text-center">
+                            <p class="text-[9px] font-bold text-blue-400 uppercase mb-1">Bolsa</p>
+                            <p id="p-inv" class="text-xl font-black text-blue-600">0%</p>
+                        </div>
+                        <div class="bg-blue-50 dark:bg-blue-400/10 p-4 rounded-2xl text-center">
+                            <p class="text-[9px] font-bold text-blue-300 uppercase mb-1">Cripto</p>
+                            <p id="p-cri" class="text-xl font-black text-blue-400">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OBJETIVOS -->
+                <div class="bento-card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-[11px] font-black uppercase tracking-widest text-slate-400">Metas Financieras</h2>
+                        <button onclick="addGoal()" class="w-10 h-10 bg-blue-600 text-white rounded-full font-bold shadow-lg">+</button>
+                    </div>
+                    <div id="goals-list" class="space-y-6">
+                        <!-- Se genera vía JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            currentTab: 'banco',
+            isIncognito: false,
+            portfolio: {
+                banco: [{id: 1, name: 'Cuenta Corriente', value: 5000}],
+                inversiones: [{id: 2, name: 'ETF World', invested: 10000, current: 12500}],
+                cripto: [{id: 3, name: 'bitcoin', qty: 0.1, price: 62000}],
+            },
+            goals: [{id: 1, name: 'Libertad Financiera', target: 100000}]
+        };
+
+        function updateUI() {
+            const cat = document.getElementById('input-category').value;
+            document.getElementById('input-val2').style.opacity = cat === 'banco' ? '0.3' : '1';
+            document.getElementById('input-val2').disabled = cat === 'banco';
+            
+            render();
+        }
+
+        function render() {
+            // Totales
+            const totalBanco = state.portfolio.banco.reduce((a, b) => a + b.value, 0);
+            const totalInv = state.portfolio.inversiones.reduce((a, b) => a + b.current, 0);
+            const totalCripto = state.portfolio.cripto.reduce((a, b) => a + (b.qty * b.price), 0);
+            const totalNeto = totalBanco + totalInv + totalCripto;
+
+            document.getElementById('total-neto').innerText = totalNeto.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €';
+            
+            // Incognito
+            if(state.isIncognito) document.getElementById('total-neto').classList.add('incognito-blur');
+            else document.getElementById('total-neto').classList.remove('incognito-blur');
+
+            // Barras
+            const pB = totalNeto ? (totalBanco / totalNeto) * 100 : 0;
+            const pI = totalNeto ? (totalInv / totalNeto) * 100 : 0;
+            const pC = totalNeto ? (totalCripto / totalNeto) * 100 : 0;
+
+            document.getElementById('bar-banco').style.width = pB + '%';
+            document.getElementById('bar-inv').style.width = pI + '%';
+            document.getElementById('bar-cri').style.width = pC + '%';
+            
+            document.getElementById('p-banco').innerText = Math.round(pB) + '%';
+            document.getElementById('p-inv').innerText = Math.round(pI) + '%';
+            document.getElementById('p-cri').innerText = Math.round(pC) + '%';
+
+            // Lista
+            const list = document.getElementById('list-container');
+            list.innerHTML = state.portfolio[state.currentTab].map(item => `
+                <div class="flex justify-between items-center p-5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-transparent hover:border-blue-500/20 transition-all">
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-1">${state.currentTab}</p>
+                        <p class="font-bold text-sm">${item.name}</p>
+                    </div>
+                    <div class="flex items-center gap-5">
+                        <p class="font-black tabular-nums ${state.isIncognito ? 'incognito-blur' : ''}">
+                            ${(item.value || item.current || (item.qty * item.price)).toLocaleString()} €
+                        </p>
+                        <button onclick="deleteItem('${state.currentTab}', ${item.id})" class="text-rose-500/50 hover:text-rose-500 font-bold">✕</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Metas
+            document.getElementById('goals-list').innerHTML = state.goals.map(g => {
+                const progress = Math.min((totalNeto / g.target) * 100, 100);
+                return `
+                    <div>
+                        <div class="flex justify-between items-end mb-3">
+                            <p class="text-xs font-black uppercase tracking-widest text-slate-500">${g.name}</p>
+                            <p class="text-sm font-black text-blue-600">${Math.round(progress)}%</p>
+                        </div>
+                        <div class="h-3 bg-slate-100 dark:bg-slate-800 rounded-full p-0.5">
+                            <div class="h-full bg-blue-600 rounded-full bar-transition shadow-sm" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setTab(t) {
+            state.currentTab = t;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-btn-' + t).classList.add('active');
+            render();
+        }
+
+        function toggleIncognito() {
+            state.isIncognito = !state.isIncognito;
+            document.getElementById('eye-icon').innerText = state.isIncognito ? '🙈' : '👁️';
+            render();
+        }
+
+        function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
+
+        function addItem() {
+            const cat = document.getElementById('input-category').value;
+            const name = document.getElementById('input-name').value;
+            const v1 = parseFloat(document.getElementById('input-val1').value);
+            const v2 = parseFloat(document.getElementById('input-val2').value);
+
+            if(!name || isNaN(v1)) return;
+
+            const newItem = { id: Date.now(), name };
+            if(cat === 'banco') newItem.value = v1;
+            else if(cat === 'inversiones') { newItem.invested = v1; newItem.current = v2 || v1; }
+            else { newItem.qty = v1; newItem.price = v2 || 0; }
+
+            state.portfolio[cat].push(newItem);
+            render();
+            
+            // Limpiar
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-val1').value = '';
+            document.getElementById('input-val2').value = '';
+        }
+
+        function deleteItem(cat, id) {
+            state.portfolio[cat] = state.portfolio[cat].filter(i => i.id !== id);
+            render();
+        }
+
+        function addGoal() {
+            const n = prompt("Nombre de la meta:");
+            const t = parseFloat(prompt("Cantidad objetivo (€):"));
+            if(n && t) {
+                state.goals.push({id: Date.now(), name: n, target: t});
+                render();
+            }
+        }
+
+        // Inicializar
+        window.onload = render;
+    </script>
+</body>
+</html>
