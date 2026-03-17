@@ -30,6 +30,7 @@
             background-color: #f8fafc; 
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: contain;
+            touch-action: manipulation;
         }
         .dark body { background-color: #020617; }
         
@@ -73,6 +74,15 @@
             40% { content: '..'; }
             60% { content: '...'; }
             80%, 100% { content: ''; }
+        }
+
+        /* Mejora táctica para móviles */
+        .delete-btn {
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -295,7 +305,7 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <p class="font-black tabular-nums">${(item.val || item.qty * item.price).toLocaleString()} €</p>
-                        <button onclick="deleteItem('${state.tab}', ${item.id})" class="opacity-0 group-hover:opacity-100 text-rose-500 font-bold transition-opacity">✕</button>
+                        <button onclick="deleteItem('${state.tab}', ${item.id})" class="delete-btn opacity-100 md:opacity-0 group-hover:opacity-100 text-rose-500 font-bold transition-opacity">✕</button>
                     </div>
                 </div>
             `).join('') || '<p class="text-center text-slate-400 text-xs py-10 italic">No hay registros en esta categoría</p>';
