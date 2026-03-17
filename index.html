@@ -222,7 +222,19 @@
             ]
         };
 
-        const cryptoLogos = { 'btc': '1', 'eth': '279', 'sol': '4128', 'doge': '5', 'usdt': '1', 'bnb': '183' };
+        // Mapeo ampliado y verificado de IDs de CoinGecko
+        const cryptoLogos = { 
+            'btc': 'bitcoin', 
+            'eth': 'ethereum', 
+            'sol': 'solana', 
+            'doge': 'dogecoin', 
+            'usdt': 'tether', 
+            'bnb': 'binancecoin',
+            'ada': 'cardano',
+            'xrp': 'ripple',
+            'dot': 'polkadot',
+            'matic': 'polygon'
+        };
 
         async function analyzePortfolio() {
             const el = document.getElementById('ai-analysis');
@@ -268,6 +280,12 @@
         function deleteItem(cat, id) { state.portfolio[cat] = state.portfolio[cat].filter(i => i.id !== id); render(); }
         function deleteGoal(id) { state.goals = state.goals.filter(g => g.id !== id); render(); }
 
+        // Función para manejar el error de carga de imagen
+        function handleImgError(img, initial) {
+            const parent = img.parentElement;
+            parent.innerHTML = `<span class="font-black text-blue-500">${initial}</span>`;
+        }
+
         function render() {
             localStorage.setItem('pascu_data_v2', JSON.stringify(state));
             
@@ -294,15 +312,21 @@
             container.innerHTML = state.portfolio[state.tab].map(item => {
                 const isC = state.tab === 'cripto';
                 const val = isC ? item.qty * item.price : item.val;
-                const logoId = isC ? cryptoLogos[item.name.toLowerCase()] : null;
-                const logo = logoId 
-                    ? `<img src="https://assets.coingecko.com/coins/images/${logoId}/small/${item.name.toLowerCase()}.png" class="w-full h-full object-contain">`
+                const coinId = isC ? cryptoLogos[item.name.toLowerCase()] : null;
+                
+                // Si existe en el mapa, intentamos cargar de CoinGecko, si no usamos la inicial directamente
+                const logo = coinId 
+                    ? `<img src="https://assets.coingecko.com/coins/images/1/small/${coinId}.png" 
+                            onerror="handleImgError(this, '${item.name[0]}')" 
+                            class="w-full h-full object-contain p-1">`
                     : `<span class="font-black text-blue-500">${item.name[0]}</span>`;
 
                 return `
                 <div class="flex justify-between items-center p-5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center overflow-hidden shadow-sm">${logo}</div>
+                        <div class="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center overflow-hidden shadow-sm">
+                            ${logo}
+                        </div>
                         <div>
                             <p class="font-bold text-sm leading-none mb-1">${item.name}</p>
                             ${isC ? `<p class="text-[10px] text-slate-400 font-bold uppercase">${item.qty} u.</p>` : ''}
