@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PascuFinanzas | Pro Dashboard</title>
+    <title>PascuFinanzas | Pro Sync</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -60,17 +60,16 @@
         .ai-panel.open { right: 0; }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .animate-spin-once { animation: spin 0.6s ease-in-out; }
+        .animate-spin { animation: spin 1s linear infinite; }
 
-        /* Estilo para barra de progreso de objetivos */
         .progress-bar { height: 8px; border-radius: 4px; background: #e2e8f0; overflow: hidden; }
         .dark .progress-bar { background: #1e293b; }
-        .progress-fill { height: 100%; background: #3b82f6; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-fill { height: 100%; background: #3b82f6; transition: width 1s ease-in-out; }
     </style>
 </head>
 <body class="p-4 md:p-10 min-h-screen text-slate-900 dark:text-slate-100 pb-24 md:pb-10">
 
-    <!-- PANEL OBJETIVOS (MODAL MÓVIL) -->
+    <!-- MODAL OBJETIVOS -->
     <div id="goals-hub" class="ai-panel">
         <div class="flex justify-between items-center mb-10">
             <div>
@@ -79,32 +78,30 @@
             </div>
             <button onclick="toggleGoals()" class="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-2xl font-bold">✕</button>
         </div>
-        <div id="goals-list-mobile" class="space-y-4">
-            <!-- Se llena con JS -->
-        </div>
+        <div id="goals-list-mobile" class="space-y-4"></div>
         <div class="mt-10 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl">
-            <h3 class="text-xs font-black uppercase mb-4 tracking-tighter">Añadir Meta</h3>
+            <h3 class="text-xs font-black uppercase mb-4 tracking-tighter">Nueva Meta</h3>
             <div class="space-y-3">
-                <input type="text" id="goal-name" placeholder="Nombre (ej: Casa)" class="input-pro">
+                <input type="text" id="goal-name" placeholder="Nombre (ej: Viaje)" class="input-pro">
                 <input type="number" id="goal-target" placeholder="Objetivo (€)" class="input-pro">
-                <button onclick="addGoal()" class="w-full py-4 bg-blue-600 text-white font-black rounded-xl text-xs uppercase">Crear Objetivo</button>
+                <button onclick="addGoal()" class="w-full py-4 bg-blue-600 text-white font-black rounded-xl text-xs uppercase">Crear</button>
             </div>
         </div>
     </div>
 
-    <!-- PANEL IA -->
+    <!-- MODAL IA -->
     <div id="ai-hub" class="ai-panel">
         <div class="flex justify-between items-center mb-10">
             <div>
                 <h2 class="text-2xl font-black italic uppercase leading-none text-blue-500">IA ANALISTA</h2>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Generado por Gemini</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Soporte Gemini</p>
             </div>
             <button onclick="toggleAI()" class="w-12 h-12 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-2xl font-bold">✕</button>
         </div>
-        <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border border-blue-100 dark:border-blue-800 mb-6 text-sm font-medium leading-relaxed italic" id="ai-analysis">
-            Haz clic en analizar para obtener un diagnóstico de tu diversificación.
+        <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border border-blue-100 dark:border-blue-800 mb-6 text-sm font-medium italic" id="ai-analysis">
+            Haz clic en analizar para obtener un diagnóstico.
         </div>
-        <button onclick="analyzePortfolio()" class="w-full py-5 bg-blue-600 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20">Auditar Cartera</button>
+        <button onclick="analyzePortfolio()" class="w-full py-5 bg-blue-600 text-white font-black rounded-2xl text-xs uppercase tracking-widest">Auditar Cartera</button>
     </div>
 
     <div class="max-w-6xl mx-auto">
@@ -113,12 +110,13 @@
                 <div class="w-16 h-16 bg-blue-600 rounded-[22px] flex items-center justify-center text-white font-black text-3xl shadow-xl shadow-blue-500/30">P</div>
                 <div>
                     <h1 class="text-4xl font-black tracking-tighter uppercase italic leading-none">PASCU<span class="text-blue-600">FINANZAS</span></h1>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">Wealth Management</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">Personal Asset Manager</p>
                 </div>
             </div>
             
             <div class="flex flex-row-reverse md:flex-row w-full md:w-auto items-center justify-between md:justify-end gap-6">
                 <div class="flex items-center gap-3">
+                    <button onclick="refreshData()" id="refresh-btn" class="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-xl hover:text-blue-500 transition-colors">🔄</button>
                     <button onclick="toggleAI()" class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25 text-xl">🤖</button>
                     <button onclick="toggleDarkMode()" class="w-14 h-14 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-center bg-white dark:bg-slate-900 text-xl shadow-sm">🌓</button>
                 </div>
@@ -134,34 +132,34 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-7 space-y-8">
-                <!-- REGISTRO -->
+                <!-- FORMULARIO REGISTRO -->
                 <div class="bento-card">
                     <h2 class="text-[11px] font-black uppercase tracking-widest mb-6 text-slate-400">Registrar Activo</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <select id="input-category" class="input-pro">
+                        <select id="input-category" class="input-pro" onchange="updateFormFields()">
                             <option value="banco">🏦 Banco</option>
-                            <option value="inversiones">📈 Inversión</option>
+                            <option value="inversiones">📈 Bolsa</option>
                             <option value="cripto" selected>₿ Crypto</option>
                         </select>
                         <input type="text" id="input-name" placeholder="Nombre/Ticker" class="input-pro">
                     </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div id="extra-fields" class="grid grid-cols-2 gap-4 mb-4">
                         <input type="number" id="input-val1" placeholder="Cantidad" class="input-pro">
-                        <input type="number" id="input-val2" placeholder="Precio Compra" class="input-pro">
+                        <input type="number" id="input-val2" placeholder="Precio Compra (€)" class="input-pro">
                     </div>
-                    <button onclick="addItem()" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl text-sm uppercase tracking-widest">Añadir Activo</button>
+                    <button onclick="addItem()" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl text-sm uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all">Añadir a Cartera</button>
                 </div>
 
                 <!-- LISTADO -->
                 <div class="bento-card">
                     <div class="flex items-center justify-between mb-8">
-                        <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl w-full mr-4">
+                        <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl w-full">
                             <button onclick="setTab('banco')" id="tab-banco" class="tab-btn">Bancos</button>
                             <button onclick="setTab('inversiones')" id="tab-inv" class="tab-btn">Bolsa</button>
                             <button onclick="setTab('cripto')" id="tab-cri" class="tab-btn active">Tokens</button>
                         </div>
                     </div>
-                    <div id="list-container" class="space-y-3"></div>
+                    <div id="list-container" class="space-y-4"></div>
                 </div>
             </div>
 
@@ -169,137 +167,175 @@
             <div class="lg:col-span-5 space-y-8">
                 <!-- RIESGO -->
                 <div class="bento-card">
-                    <h2 class="text-[11px] font-black uppercase tracking-widest mb-8 text-slate-400">Riesgo & Diversificación</h2>
-                    <div class="h-10 w-full bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden flex mb-6">
-                        <div id="bar-b" class="h-full bg-slate-400 transition-all duration-1000" style="width: 0%"></div>
-                        <div id="bar-i" class="h-full bg-blue-600 transition-all duration-1000" style="width: 0%"></div>
-                        <div id="bar-c" class="h-full bg-blue-400 transition-all duration-1000" style="width: 0%"></div>
+                    <h2 class="text-[11px] font-black uppercase tracking-widest mb-8 text-slate-400">Diversificación</h2>
+                    <div class="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex mb-6">
+                        <div id="bar-b" class="h-full bg-slate-400 transition-all duration-700"></div>
+                        <div id="bar-i" class="h-full bg-blue-600 transition-all duration-700"></div>
+                        <div id="bar-c" class="h-full bg-blue-400 transition-all duration-700"></div>
                     </div>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-xl text-center">
-                            <p id="p-b" class="text-sm font-black">0%</p>
-                        </div>
-                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
-                            <p id="p-i" class="text-sm font-black text-blue-600">0%</p>
-                        </div>
-                        <div class="p-3 bg-blue-50 dark:bg-blue-400/10 rounded-xl text-center">
-                            <p id="p-c" class="text-sm font-black text-blue-400">0%</p>
-                        </div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="p-2"><p id="p-b" class="text-xs font-black">0%</p><p class="text-[8px] uppercase text-slate-400">Cash</p></div>
+                        <div class="p-2"><p id="p-i" class="text-xs font-black text-blue-600">0%</p><p class="text-[8px] uppercase text-slate-400">Invers.</p></div>
+                        <div class="p-2"><p id="p-c" class="text-xs font-black text-blue-400">0%</p><p class="text-[8px] uppercase text-slate-400">Crypto</p></div>
                     </div>
                 </div>
 
                 <!-- OBJETIVOS PC -->
                 <div class="bento-card hidden lg:block">
                     <div class="flex justify-between items-center mb-8">
-                        <h2 class="text-[11px] font-black uppercase tracking-widest text-slate-400">Objetivos</h2>
-                        <button onclick="toggleGoals()" class="text-[10px] font-black text-blue-500 uppercase">+ Nuevo</button>
+                        <h2 class="text-[11px] font-black uppercase tracking-widest text-slate-400">Metas</h2>
+                        <button onclick="toggleGoals()" class="text-[10px] font-black text-blue-500 uppercase">+ Nueva</button>
                     </div>
-                    <div id="goals-list-pc" class="space-y-6">
-                        <!-- Se llena con JS -->
-                    </div>
+                    <div id="goals-list-pc" class="space-y-6"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- BOTONES MÓVILES FLOTANTES -->
+    <!-- MÓVIL: DIANA Y BOT -->
     <div class="fixed bottom-6 right-6 flex items-center gap-3 lg:hidden">
-        <button onclick="toggleGoals()" class="w-16 h-16 bg-white dark:bg-slate-800 text-2xl flex items-center justify-center rounded-full shadow-2xl border border-slate-200 dark:border-slate-700 active:scale-90 transition-transform">🎯</button>
-        <button onclick="toggleAI()" class="w-16 h-16 bg-blue-600 text-white text-2xl flex items-center justify-center rounded-full shadow-2xl active:scale-90 transition-transform">🤖</button>
+        <button onclick="toggleGoals()" class="w-16 h-16 bg-white dark:bg-slate-800 text-2xl flex items-center justify-center rounded-full shadow-2xl border border-slate-200 dark:border-slate-700">🎯</button>
+        <button onclick="toggleAI()" class="w-16 h-16 bg-blue-600 text-white text-2xl flex items-center justify-center rounded-full shadow-2xl">🤖</button>
     </div>
 
     <script>
         const apiKey = "";
         const modelName = "gemini-2.5-flash-preview-09-2025";
 
-        let state = JSON.parse(localStorage.getItem('pascu_data_v2')) || {
+        let state = JSON.parse(localStorage.getItem('pascu_data_final')) || {
             tab: 'cripto',
             isPrivate: false,
             portfolio: { banco: [], inversiones: [], cripto: [] },
-            goals: [
-                { id: 1, name: 'Fondo de Emergencia', target: 10000 },
-                { id: 2, name: 'Libertad Financiera', target: 500000 }
-            ]
+            goals: []
         };
 
-        // Mapeo ampliado y verificado de IDs de CoinGecko
-        const cryptoLogos = { 
-            'btc': 'bitcoin', 
-            'eth': 'ethereum', 
-            'sol': 'solana', 
-            'doge': 'dogecoin', 
-            'usdt': 'tether', 
-            'bnb': 'binancecoin',
-            'ada': 'cardano',
-            'xrp': 'ripple',
-            'dot': 'polkadot',
-            'matic': 'polygon'
+        const cryptoMapping = {
+            'BTC': 'bitcoin', 'ETH': 'ethereum', 'SOL': 'solana', 'DOGE': 'dogecoin', 
+            'XRP': 'ripple', 'ADA': 'cardano', 'USDT': 'tether', 'BNB': 'binancecoin'
         };
 
-        async function analyzePortfolio() {
-            const el = document.getElementById('ai-analysis');
-            el.innerText = "...";
-            const summary = JSON.stringify(state.portfolio);
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: `Analiza esta cartera en 2 líneas: ${summary}` }] }] })
-            });
-            const data = await res.json();
-            el.innerText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Error al analizar.";
+        // --- LÓGICA DE FORMULARIO ---
+        function updateFormFields() {
+            const cat = document.getElementById('input-category').value;
+            const extra = document.getElementById('extra-fields');
+            if (cat === 'banco') {
+                extra.innerHTML = `<input type="number" id="input-val1" placeholder="Saldo Inicial (€)" class="input-pro col-span-2">`;
+            } else if (cat === 'inversiones') {
+                extra.innerHTML = `<input type="number" id="input-val1" placeholder="Valor Actual (€)" class="input-pro col-span-2">`;
+            } else {
+                extra.innerHTML = `
+                    <input type="number" id="input-val1" placeholder="Cantidad" class="input-pro">
+                    <input type="number" id="input-val2" placeholder="Precio Compra (€)" class="input-pro">
+                `;
+            }
         }
 
-        function togglePrivacy() { state.isPrivate = !state.isPrivate; render(); }
-        function toggleAI() { document.getElementById('ai-hub').classList.toggle('open'); }
-        function toggleGoals() { document.getElementById('goals-hub').classList.toggle('open'); }
-        function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
+        // --- LÓGICA DE DATOS ---
+        async function refreshData() {
+            const btn = document.getElementById('refresh-btn');
+            btn.classList.add('animate-spin');
+            
+            const ids = state.portfolio.cripto.map(c => cryptoMapping[c.name] || c.name.toLowerCase()).join(',');
+            if (ids) {
+                try {
+                    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur`);
+                    const prices = await res.json();
+                    state.portfolio.cripto = state.portfolio.cripto.map(c => {
+                        const id = cryptoMapping[c.name] || c.name.toLowerCase();
+                        if (prices[id]) c.price = prices[id].eur;
+                        return c;
+                    });
+                } catch (e) { console.error("Error API"); }
+            }
+            
+            setTimeout(() => {
+                btn.classList.remove('animate-spin');
+                render();
+            }, 500);
+        }
 
         function addItem() {
             const cat = document.getElementById('input-category').value;
             const name = document.getElementById('input-name').value.toUpperCase();
             const v1 = parseFloat(document.getElementById('input-val1').value);
-            const v2 = parseFloat(document.getElementById('input-val2').value) || 0;
+            const v2 = document.getElementById('input-val2') ? parseFloat(document.getElementById('input-val2').value) : 0;
             
             if(!name || isNaN(v1)) return;
             
             const item = { id: Date.now(), name };
-            if(cat === 'cripto') { item.qty = v1; item.price = v2; } else { item.val = v1; }
+            if(cat === 'cripto') { 
+                item.qty = v1; 
+                item.avgPrice = v2; 
+                item.price = v2 || 1; 
+            } else { 
+                item.val = v1; 
+            }
+            
             state.portfolio[cat].push(item);
             render();
+            if(cat === 'cripto') refreshData();
+            
+            // Limpiar inputs
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-val1').value = '';
+            if(document.getElementById('input-val2')) document.getElementById('input-val2').value = '';
+        }
+
+        // Función corregida para editar saldo
+        function updateBankBalance(id) {
+            const currentItem = state.portfolio.banco.find(b => b.id === id);
+            if(!currentItem) return;
+
+            const newBalance = prompt(`Editar saldo de ${currentItem.name}:`, currentItem.val);
+            
+            if (newBalance !== null && newBalance !== "") {
+                const parsed = parseFloat(newBalance.replace(',', '.'));
+                if (!isNaN(parsed)) {
+                    state.portfolio.banco = state.portfolio.banco.map(b => b.id === id ? {...b, val: parsed} : b);
+                    render();
+                } else {
+                    alert("Por favor, introduce un número válido.");
+                }
+            }
         }
 
         function addGoal() {
             const name = document.getElementById('goal-name').value;
             const target = parseFloat(document.getElementById('goal-target').value);
-            if(!name || !target) return;
+            if(!name || isNaN(target)) return;
             state.goals.push({ id: Date.now(), name, target });
             render();
             toggleGoals();
+            document.getElementById('goal-name').value = '';
+            document.getElementById('goal-target').value = '';
         }
 
-        function deleteItem(cat, id) { state.portfolio[cat] = state.portfolio[cat].filter(i => i.id !== id); render(); }
-        function deleteGoal(id) { state.goals = state.goals.filter(g => g.id !== id); render(); }
-
-        // Función para manejar el error de carga de imagen
-        function handleImgError(img, initial) {
-            const parent = img.parentElement;
-            parent.innerHTML = `<span class="font-black text-blue-500">${initial}</span>`;
+        function deleteItem(cat, id, event) { 
+            if(event) event.stopPropagation(); // Evita que al borrar se abra el editor de saldo
+            state.portfolio[cat] = state.portfolio[cat].filter(i => i.id !== id); 
+            render(); 
+        }
+        
+        function deleteGoal(id) { 
+            state.goals = state.goals.filter(g => g.id !== id); 
+            render(); 
         }
 
+        // --- RENDERIZADO ---
         function render() {
-            localStorage.setItem('pascu_data_v2', JSON.stringify(state));
+            localStorage.setItem('pascu_data_final', JSON.stringify(state));
             
             const tB = state.portfolio.banco.reduce((a, b) => a + b.val, 0);
             const tI = state.portfolio.inversiones.reduce((a, b) => a + b.val, 0);
             const tC = state.portfolio.cripto.reduce((a, b) => a + (b.qty * b.price), 0);
             const neto = tB + tI + tC;
 
-            document.getElementById('total-neto').innerText = state.isPrivate ? "•••• €" : neto.toLocaleString() + " €";
+            document.getElementById('total-neto').innerText = state.isPrivate ? "•••• €" : neto.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + " €";
             
+            // Gráfico Riesgo
             const pb = neto ? (tB/neto)*100 : 0;
             const pi = neto ? (tI/neto)*100 : 0;
             const pc = neto ? (tC/neto)*100 : 0;
-            
             document.getElementById('bar-b').style.width = pb + "%";
             document.getElementById('bar-i').style.width = pi + "%";
             document.getElementById('bar-c').style.width = pc + "%";
@@ -307,67 +343,110 @@
             document.getElementById('p-i').innerText = Math.round(pi) + "%";
             document.getElementById('p-c').innerText = Math.round(pc) + "%";
 
-            // Render Listas de Activos
+            // Listado Activos
             const container = document.getElementById('list-container');
             container.innerHTML = state.portfolio[state.tab].map(item => {
                 const isC = state.tab === 'cripto';
-                const val = isC ? item.qty * item.price : item.val;
-                const coinId = isC ? cryptoLogos[item.name.toLowerCase()] : null;
+                const isB = state.tab === 'banco';
                 
-                // Si existe en el mapa, intentamos cargar de CoinGecko, si no usamos la inicial directamente
-                const logo = coinId 
-                    ? `<img src="https://assets.coingecko.com/coins/images/1/small/${coinId}.png" 
-                            onerror="handleImgError(this, '${item.name[0]}')" 
-                            class="w-full h-full object-contain p-1">`
-                    : `<span class="font-black text-blue-500">${item.name[0]}</span>`;
+                if (isC) {
+                    const currentVal = item.qty * item.price;
+                    const costBasis = item.qty * (item.avgPrice || item.price);
+                    const pnlEuro = currentVal - costBasis;
+                    const pnlPerc = costBasis > 0 ? (pnlEuro / costBasis) * 100 : 0;
+                    const isProfit = pnlEuro >= 0;
+
+                    return `
+                    <div class="flex justify-between items-center p-5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-transparent hover:border-blue-500/20 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center font-black text-blue-500 shadow-sm uppercase">${item.name[0]}</div>
+                            <div>
+                                <p class="font-bold text-sm leading-none mb-1">${item.name}</p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase">${item.qty.toLocaleString()} U. x ${item.price.toLocaleString()}€</p>
+                            </div>
+                        </div>
+                        <div class="text-right flex items-center gap-4">
+                            <div>
+                                <p class="font-black text-sm">${state.isPrivate ? '•••' : currentVal.toLocaleString()} €</p>
+                                <p class="text-[9px] font-bold ${isProfit ? 'text-emerald-500' : 'text-rose-500'}">
+                                    ${isProfit ? '▲' : '▼'} ${pnlPerc.toFixed(2)}% (${pnlEuro.toFixed(2)}€)
+                                </p>
+                            </div>
+                            <button onclick="deleteItem('cripto', ${item.id}, event)" class="text-slate-300 hover:text-rose-500 transition-colors ml-2">✕</button>
+                        </div>
+                    </div>`;
+                }
 
                 return `
-                <div class="flex justify-between items-center p-5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center overflow-hidden shadow-sm">
-                            ${logo}
-                        </div>
+                <div onclick="${isB ? `updateBankBalance(${item.id})` : ''}" class="flex justify-between items-center p-5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl transition-all ${isB ? 'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800' : ''}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center text-lg">${isB ? '🏦' : '📈'}</div>
                         <div>
-                            <p class="font-bold text-sm leading-none mb-1">${item.name}</p>
-                            ${isC ? `<p class="text-[10px] text-slate-400 font-bold uppercase">${item.qty} u.</p>` : ''}
+                            <p class="font-bold text-sm leading-none mb-0.5">${item.name}</p>
+                            ${isB ? '<p class="text-[9px] text-blue-500 font-bold uppercase tracking-widest">Toca para editar saldo</p>' : ''}
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <p class="font-black text-sm">${state.isPrivate ? '•••' : val.toLocaleString() + ' €'}</p>
-                        <button onclick="deleteItem('${state.tab}', ${item.id})" class="text-slate-300">✕</button>
+                        <p class="font-black text-sm">${state.isPrivate ? '•••' : item.val.toLocaleString() + ' €'}</p>
+                        <button onclick="deleteItem('${state.tab}', ${item.id}, event)" class="text-slate-300 hover:text-rose-500 p-2">✕</button>
                     </div>
                 </div>`;
-            }).join('');
+            }).join('') || '<p class="text-center py-10 text-slate-400 italic text-sm">No hay activos registrados.</p>';
 
-            // Render Objetivos
+            // Objetivos
             const goalsHtml = state.goals.map(g => {
                 const perc = Math.min((neto / g.target) * 100, 100).toFixed(1);
                 return `
                 <div class="group relative">
                     <div class="flex justify-between items-end mb-2">
                         <p class="text-xs font-black uppercase tracking-tighter">${g.name}</p>
-                        <button onclick="deleteGoal(${g.id})" class="text-[10px] text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">Eliminar</button>
+                        <button onclick="deleteGoal(${g.id})" class="text-[10px] text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100">Eliminar</button>
                     </div>
                     <div class="progress-bar mb-2"><div class="progress-fill" style="width: ${perc}%"></div></div>
-                    <div class="flex justify-between text-[10px] font-bold text-slate-400">
-                        <span>${perc}% Completado</span>
-                        <span>Meta: ${g.target.toLocaleString()}€</span>
+                    <div class="flex justify-between text-[9px] font-bold text-slate-400">
+                        <span>${perc}% de la meta</span>
+                        <span>Objetivo: ${g.target.toLocaleString()}€</span>
                     </div>
                 </div>`;
             }).join('');
-            
-            document.getElementById('goals-list-pc').innerHTML = goalsHtml || '<p class="text-center text-xs text-slate-400 py-4 italic">No hay metas definidas.</p>';
+            document.getElementById('goals-list-pc').innerHTML = goalsHtml;
             document.getElementById('goals-list-mobile').innerHTML = goalsHtml;
         }
 
+        // --- UTILS UI ---
         function setTab(t) {
             state.tab = t;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + (t === 'inversiones' ? 'inv' : t === 'cripto' ? 'cri' : 'banco')).classList.add('active');
+            updateFormFields();
             render();
         }
 
-        window.onload = render;
+        function togglePrivacy() { state.isPrivate = !state.isPrivate; render(); }
+        function toggleAI() { document.getElementById('ai-hub').classList.toggle('open'); }
+        function toggleGoals() { document.getElementById('goals-hub').classList.toggle('open'); }
+        function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
+
+        async function analyzePortfolio() {
+            const el = document.getElementById('ai-analysis');
+            el.innerHTML = '<span class="animate-pulse">Consultando a Gemini...</span>';
+            try {
+                const summary = JSON.stringify(state.portfolio);
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: `Analiza esta cartera brevemente: ${summary}` }] }] })
+                });
+                const data = await res.json();
+                el.innerText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Análisis no disponible en este momento.";
+            } catch (e) { el.innerText = "Error de conexión con la IA."; }
+        }
+
+        window.onload = () => {
+            updateFormFields();
+            render();
+            refreshData();
+        };
     </script>
 </body>
 </html>
