@@ -3,145 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>PascuFinanzas | Pro Analytics</title>
+    <title>PascuFinanzas | Premium Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
-        body { font-family: 'Outfit', sans-serif; background-color: #f8fafc; transition: background-color 0.3s; }
-        .dark body { background-color: #020617; color: #f1f5f9; }
-        .bento-card { background: white; border-radius: 24px; padding: 24px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-        .dark .bento-card { background: #0f172a; border: 1px solid #1e293b; }
-        .input-pro { background: #f1f5f9; border-radius: 12px; padding: 12px; width: 100%; outline: none; border: 2px solid transparent; transition: 0.2s; font-size: 14px; }
-        .dark .input-pro { background: #1e293b; color: white; }
-        .input-pro:focus { border-color: #3b82f6; background: white; }
-        .dark .input-pro:focus { background: #1e293b; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
-        /* Panel de Gráficos */
-        .analytics-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 500px; height: 100%; background: white; z-index: 50; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -20px 0 50px rgba(0,0,0,0.1); padding: 24px; display: flex; flex-direction: column; overflow-y: auto; }
-        .dark .analytics-panel { background: #0f172a; box-shadow: -20px 0 50px rgba(0,0,0,0.5); border-left: 1px solid #1e293b; }
-        .analytics-panel.open { right: 0; }
-        
-        .chart-container { position: relative; margin-bottom: 32px; background: #f8fafc; border-radius: 20px; padding: 16px; border: 1px solid #f1f5f9; }
-        .dark .chart-container { background: #1e293b33; border: 1px solid #ffffff0a; }
+        :root {
+            --bg-main: #fcfcfd;
+            --card-bg: #ffffff;
+            --accent: #4f46e5;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+        }
 
-        .tab-btn { padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 12px; transition: 0.2s; color: #94a3b8; }
-        .tab-btn.active { background: #3b82f6; color: white; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+
+        .dark {
+            --bg-main: #0b0f1a;
+            --card-bg: #161b2a;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --accent: #6366f1;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .dark .glass-card { border-color: rgba(255, 255, 255, 0.05); }
+
+        .stat-card {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .input-premium {
+            background: #f3f4f6;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 10px 14px;
+            width: 100%;
+            outline: none;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .dark .input-premium { background: #1f2937; color: white; }
+        .input-premium:focus { border-color: var(--accent); background: white; }
+        .dark .input-premium:focus { background: #1f2937; }
+
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* Panel Lateral de Analíticas */
+        .analytics-panel {
+            position: fixed; top: 0; right: -100%;
+            width: 100%; max-width: 450px; height: 100%;
+            background: var(--card-bg);
+            z-index: 100; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .analytics-panel.open { right: 0; }
+
+        .tab-active {
+            color: var(--accent);
+            position: relative;
+        }
+        .tab-active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 4px; background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="antialiased">
 
-    <!-- PANEL DE ANALÍTICA -->
+    <!-- ANALYTICS SIDEBAR -->
     <div id="analytics-panel" class="analytics-panel">
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h2 class="text-2xl font-black text-blue-600 uppercase italic">Analytics</h2>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Visualización de Patrimonio</p>
-            </div>
-            <button onclick="toggleAnalytics()" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-xl hover:bg-slate-200 transition-colors">✕</button>
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-xl font-bold">Resumen Detallado</h2>
+            <button onclick="toggleAnalytics()" class="text-2xl">✕</button>
         </div>
         
-        <div class="space-y-6">
-            <div class="chart-container">
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Distribución por Categoría</h3>
+        <div class="space-y-8">
+            <div class="glass-card p-6">
+                <h3 class="text-sm font-semibold text-gray-400 mb-6 uppercase tracking-wider">Distribución</h3>
                 <canvas id="distributionChart"></canvas>
             </div>
 
-            <div class="chart-container">
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Proyección a 6 Meses (2% mensual)</h3>
+            <div class="glass-card p-6">
+                <h3 class="text-sm font-semibold text-gray-400 mb-6 uppercase tracking-wider">Crecimiento Estimado</h3>
                 <canvas id="growthChart"></canvas>
             </div>
-
-            <div class="bento-card">
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Estado de Objetivos</h3>
-                <div id="goals-analytics" class="space-y-4"></div>
-            </div>
+            
+            <div id="goals-analytics" class="space-y-4"></div>
         </div>
     </div>
 
-    <div class="max-w-6xl mx-auto">
-        <header class="flex justify-between items-center mb-12">
+    <main class="max-w-5xl mx-auto px-4 py-8 md:py-12">
+        
+        <!-- HEADER -->
+        <header class="flex justify-between items-center mb-10">
             <div>
-                <h1 class="text-4xl font-black tracking-tighter italic">PASCU<span class="text-blue-600">FINANZAS</span></h1>
-                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em]">Patrimonio & Estrategia</p>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Bienvenido de nuevo</p>
+                <h1 class="text-2xl font-extrabold flex items-center gap-2">
+                    Pascu<span class="text-indigo-600">Finanzas</span>
+                </h1>
             </div>
             <div class="flex gap-3">
-                <button onclick="toggleAnalytics()" class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-xl shadow-blue-600/30 hover:scale-105 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                </button>
-                <button onclick="document.documentElement.classList.toggle('dark')" class="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 dark:border-slate-800 shadow-sm">🌓</button>
+                <button onclick="toggleAnalytics()" class="w-11 h-11 glass-card flex items-center justify-center text-xl">📊</button>
+                <button onclick="document.documentElement.classList.toggle('dark')" class="w-11 h-11 glass-card flex items-center justify-center">🌓</button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Registro de Activos -->
-            <div class="bento-card lg:col-span-2">
-                <h3 class="text-[10px] font-black text-blue-500 uppercase mb-4 tracking-widest text-center md:text-left">Nuevo Activo</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <select id="asset-category" class="input-pro font-bold">
-                        <option value="Bancos">🏦 Bancos</option>
-                        <option value="Bolsa">📈 Bolsa</option>
-                        <option value="Cripto">₿ Cripto</option>
-                    </select>
-                    <input type="text" id="asset-name" placeholder="Nombre (Ej: Santander)" class="input-pro">
-                    <input type="number" id="asset-value" placeholder="Valor (€)" class="input-pro">
-                    <button onclick="addAsset()" class="bg-slate-900 dark:bg-blue-600 text-white rounded-xl font-bold hover:opacity-90 transition-all py-3">Añadir</button>
+        <!-- TOP STATS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="glass-card stat-card bg-indigo-600 !text-white border-none shadow-indigo-200 dark:shadow-none">
+                <span class="text-xs font-bold uppercase opacity-80 tracking-wider">Patrimonio Total</span>
+                <div class="flex items-end justify-between mt-4">
+                    <span id="total-val" class="text-3xl font-extrabold">0.00 €</span>
+                    <span class="text-xs font-medium bg-white/20 px-2 py-1 rounded-lg">+2.4%</span>
                 </div>
             </div>
-
-            <!-- Resumen Total -->
-            <div class="bento-card flex flex-col justify-center text-center">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Patrimonio Neto</h3>
-                <p id="total-val" class="text-4xl font-black text-slate-900 dark:text-white">0.00 €</p>
+            <div class="glass-card stat-card">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Meta Principal</span>
+                <div class="mt-4">
+                    <div id="main-goal-name" class="text-sm font-bold mb-2">Fondo Libertad</div>
+                    <div class="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full">
+                        <div id="main-goal-bar" class="h-full bg-indigo-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card stat-card">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Ahorro Mensual</span>
+                <div class="flex items-end justify-between mt-4">
+                    <span class="text-xl font-extrabold text-emerald-500">650.00 €</span>
+                    <span class="text-[10px] text-gray-400 italic">Objetivo: 800€</span>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Listado Principal -->
-            <div class="bento-card lg:col-span-2">
-                <div class="flex justify-between items-center mb-8">
-                    <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                        <button onclick="switchTab('Todos')" class="tab-btn active" id="tab-Todos">Todos</button>
-                        <button onclick="switchTab('Bancos')" class="tab-btn" id="tab-Bancos">Bancos</button>
-                        <button onclick="switchTab('Bolsa')" class="tab-btn" id="tab-Bolsa">Bolsa</button>
-                        <button onclick="switchTab('Cripto')" class="tab-btn" id="tab-Cripto">Cripto</button>
+        <!-- MAIN ACTION & CONTENT -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- LEFT COLUMN: Assets -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Add New -->
+                <div class="glass-card p-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                        <select id="asset-category" class="input-premium font-semibold">
+                            <option value="Bancos">🏦 Bancos</option>
+                            <option value="Bolsa">📈 Bolsa</option>
+                            <option value="Cripto">₿ Cripto</option>
+                        </select>
+                        <input type="text" id="asset-name" placeholder="Concepto" class="input-premium">
+                        <input type="number" id="asset-value" placeholder="Importe (€)" class="input-premium">
+                        <button onclick="addAsset()" class="btn-primary">Añadir</button>
                     </div>
                 </div>
-                <div id="asset-list" class="space-y-3"></div>
+
+                <!-- Tabs & List -->
+                <div class="glass-card overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                        <div class="flex gap-6">
+                            <button onclick="switchTab('Todos')" id="tab-Todos" class="text-sm font-bold tab-active">Todos</button>
+                            <button onclick="switchTab('Bancos')" id="tab-Bancos" class="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Bancos</button>
+                            <button onclick="switchTab('Bolsa')" id="tab-Bolsa" class="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Bolsa</button>
+                            <button onclick="switchTab('Cripto')" id="tab-Cripto" class="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Cripto</button>
+                        </div>
+                    </div>
+                    
+                    <div id="asset-list" class="divide-y divide-gray-50 dark:divide-gray-800">
+                        <!-- Items renderizados aquí -->
+                    </div>
+                </div>
             </div>
 
-            <!-- Columna Objetivos -->
-            <div class="space-y-6">
-                <div class="bento-card">
+            <!-- RIGHT COLUMN: Goals -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glass-card p-6">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Metas</h3>
-                        <button onclick="addGoalPrompt()" class="text-blue-600 font-black text-xl">+</button>
+                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Objetivos</h3>
+                        <button onclick="addGoalPrompt()" class="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center font-bold text-indigo-500">+</button>
                     </div>
-                    <div id="goals-list" class="space-y-6"></div>
+                    <div id="goals-list" class="space-y-6">
+                        <!-- Goals renderizados aquí -->
+                    </div>
                 </div>
             </div>
+
         </div>
-    </div>
+    </main>
 
     <script>
-        let portfolio = JSON.parse(localStorage.getItem('pascu_assets_v2')) || [];
-        let goals = JSON.parse(localStorage.getItem('pascu_goals')) || [
-            { name: "Fondo de Emergencia", target: 10000 }
+        let portfolio = JSON.parse(localStorage.getItem('pascu_assets_v3')) || [];
+        let goals = JSON.parse(localStorage.getItem('pascu_goals_v3')) || [
+            { name: "Fondo Emergencia", target: 5000 }
         ];
         let currentTab = 'Todos';
         let distChart, growthChart;
 
-        function toggleAnalytics() { 
+        function toggleAnalytics() {
             const panel = document.getElementById('analytics-panel');
             panel.classList.toggle('open');
-            if(panel.classList.contains('open')) updateCharts();
+            if(panel.classList.contains('open')) setTimeout(updateCharts, 300);
         }
 
         function switchTab(tab) {
             currentTab = tab;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.add('active');
+            document.querySelectorAll('button[id^="tab-"]').forEach(b => {
+                b.classList.remove('tab-active');
+                b.classList.add('text-gray-400');
+            });
+            const active = document.getElementById('tab-' + tab);
+            active.classList.add('tab-active');
+            active.classList.remove('text-gray-400');
             render();
+        }
+
+        function getIcon(cat) {
+            if(cat === 'Bancos') return { emoji: '🏦', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' };
+            if(cat === 'Bolsa') return { emoji: '📈', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' };
+            return { emoji: '₿', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' };
         }
 
         function render() {
@@ -149,61 +264,69 @@
             const totalEl = document.getElementById('total-val');
             let total = 0;
             
-            // Calcular total real
             portfolio.forEach(a => total += a.val);
 
-            // Filtrar y mostrar activos
             const filtered = currentTab === 'Todos' ? portfolio : portfolio.filter(a => a.category === currentTab);
             
-            list.innerHTML = filtered.map((a, i) => `
-                <div class="group flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 uppercase text-slate-500">${a.category}</span>
-                            <p class="font-bold text-slate-800 dark:text-slate-200">${a.name}</p>
+            list.innerHTML = filtered.map((a, i) => {
+                const icon = getIcon(a.category);
+                return `
+                    <div class="group flex justify-between items-center p-5 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-all">
+                        <div class="flex items-center gap-4">
+                            <div class="category-icon ${icon.color}">${icon.emoji}</div>
+                            <div>
+                                <p class="font-bold text-sm leading-none mb-1">${a.name}</p>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${a.category}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-6">
+                            <p class="font-bold text-base tabular-nums">${a.val.toLocaleString()} €</p>
+                            <button onclick="deleteAsset(${i})" class="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">✕</button>
                         </div>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <p class="font-black text-lg">${a.val.toLocaleString()} €</p>
-                        <button onclick="deleteAsset(${i})" class="text-slate-300 hover:text-red-500 transition-colors">✕</button>
-                    </div>
-                </div>
-            `).join('') || `<div class="py-10 text-center opacity-30 italic text-sm">Sin activos en esta categoría</div>`;
+                `;
+            }).join('') || `<div class="py-12 text-center text-gray-400 italic text-sm">No hay registros</div>`;
             
             totalEl.innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2}) + " €";
             
             renderGoals(total);
             
-            localStorage.setItem('pascu_assets_v2', JSON.stringify(portfolio));
-            localStorage.setItem('pascu_goals', JSON.stringify(goals));
+            localStorage.setItem('pascu_assets_v3', JSON.stringify(portfolio));
+            localStorage.setItem('pascu_goals_v3', JSON.stringify(goals));
         }
 
         function renderGoals(currentTotal) {
             const container = document.getElementById('goals-list');
             const analyticsContainer = document.getElementById('goals-analytics');
             
+            if (goals.length > 0) {
+                const firstGoal = goals[0];
+                const mainProg = Math.min((currentTotal / firstGoal.target) * 100, 100);
+                document.getElementById('main-goal-name').innerText = firstGoal.name;
+                document.getElementById('main-goal-bar').style.width = mainProg + '%';
+            }
+
             const html = goals.map((g, i) => {
                 const progress = Math.min((currentTotal / g.target) * 100, 100);
                 return `
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-end">
-                            <p class="text-xs font-bold text-slate-700 dark:text-slate-300">${g.name}</p>
-                            <p class="text-[10px] font-black text-blue-600">${progress.toFixed(0)}%</p>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <p class="text-xs font-bold text-gray-600 dark:text-gray-300">${g.name}</p>
+                            <p class="text-[10px] font-black text-indigo-500">${progress.toFixed(0)}%</p>
                         </div>
-                        <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full bg-blue-600 transition-all duration-1000" style="width: ${progress}%"></div>
+                        <div class="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-indigo-500 rounded-full transition-all duration-1000" style="width: ${progress}%"></div>
                         </div>
-                        <div class="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-                            <span>0€</span>
-                            <button onclick="deleteGoal(${i})" class="hover:text-red-500">Eliminar meta</button>
-                            <span>${g.target.toLocaleString()}€</span>
+                        <div class="flex justify-between text-[10px] text-gray-400 font-medium">
+                            <span>Objetivo: ${g.target.toLocaleString()}€</span>
+                            <button onclick="deleteGoal(${i})" class="hover:text-red-500 font-bold uppercase tracking-widest text-[8px]">Quitar</button>
                         </div>
                     </div>
                 `;
             }).join('');
             
-            container.innerHTML = html || `<p class="text-center py-4 text-xs opacity-40 italic text-slate-400">No hay metas definidas</p>`;
-            analyticsContainer.innerHTML = html;
+            container.innerHTML = html;
+            analyticsContainer.innerHTML = `<h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Metas</h3>` + html;
         }
 
         function addAsset() {
@@ -223,8 +346,8 @@
         }
 
         function addGoalPrompt() {
-            const name = prompt("Nombre del objetivo:");
-            const target = parseFloat(prompt("Cantidad meta (€):"));
+            const name = prompt("¿Qué quieres conseguir?");
+            const target = parseFloat(prompt("¿Cuánto dinero necesitas? (€)"));
             if (name && !isNaN(target)) {
                 goals.push({ name, target });
                 render();
@@ -244,7 +367,7 @@
             const catData = cats.map(c => portfolio.filter(a => a.category === c).reduce((sum, curr) => sum + curr.val, 0));
             
             const isDark = document.documentElement.classList.contains('dark');
-            const textColor = isDark ? '#94a3b8' : '#64748b';
+            const textColor = isDark ? '#9ca3af' : '#6b7280';
 
             if(distChart) distChart.destroy();
             if(growthChart) growthChart.destroy();
@@ -255,41 +378,39 @@
                     labels: cats,
                     datasets: [{
                         data: catData,
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
+                        backgroundColor: ['#4f46e5', '#10b981', '#f59e0b'],
                         borderWidth: 0,
-                        hoverOffset: 15
+                        hoverOffset: 20
                     }]
                 },
                 options: {
                     plugins: { 
-                        legend: { position: 'bottom', labels: { color: textColor, font: { family: 'Outfit', weight: 'bold', size: 10 } } }
+                        legend: { position: 'bottom', labels: { color: textColor, font: { family: 'Plus Jakarta Sans', weight: '600', size: 10 } } }
                     },
-                    cutout: '75%'
+                    cutout: '80%'
                 }
             });
 
             const total = catData.reduce((a, b) => a + b, 0);
-            const mockGrowth = Array.from({length: 6}, (_, i) => total * Math.pow(1.02, i));
+            const mockGrowth = Array.from({length: 6}, (_, i) => total * Math.pow(1.025, i));
 
             growthChart = new Chart(ctxGrowth, {
                 type: 'line',
                 data: {
                     labels: ['Mes 1', 'Mes 2', 'Mes 3', 'Mes 4', 'Mes 5', 'Mes 6'],
                     datasets: [{
-                        label: 'Proyección',
                         data: mockGrowth,
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.05)',
                         fill: true,
-                        tension: 0.4,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#3b82f6'
+                        tension: 0.5,
+                        pointRadius: 0
                     }]
                 },
                 options: {
                     scales: {
                         y: { display: false },
-                        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9 } } }
+                        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, weight: 'bold' } } }
                     },
                     plugins: { legend: { display: false } }
                 }
