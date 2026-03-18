@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>PascuFinanzas | Analytics v1</title>
+    <title>PascuFinanzas | Pro Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -12,7 +12,7 @@
         .dark body { background-color: #020617; color: #f1f5f9; }
         .bento-card { background: white; border-radius: 24px; padding: 24px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
         .dark .bento-card { background: #0f172a; border: 1px solid #1e293b; }
-        .input-pro { background: #f1f5f9; border-radius: 12px; padding: 12px; width: 100%; outline: none; border: 2px solid transparent; transition: 0.2s; }
+        .input-pro { background: #f1f5f9; border-radius: 12px; padding: 12px; width: 100%; outline: none; border: 2px solid transparent; transition: 0.2s; font-size: 14px; }
         .dark .input-pro { background: #1e293b; color: white; }
         .input-pro:focus { border-color: #3b82f6; background: white; }
         .dark .input-pro:focus { background: #1e293b; }
@@ -24,11 +24,14 @@
         
         .chart-container { position: relative; margin-bottom: 32px; background: #f8fafc; border-radius: 20px; padding: 16px; border: 1px solid #f1f5f9; }
         .dark .chart-container { background: #1e293b33; border: 1px solid #ffffff0a; }
+
+        .tab-btn { padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 12px; transition: 0.2s; color: #94a3b8; }
+        .tab-btn.active { background: #3b82f6; color: white; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- PANEL DE ANALÍTICA (Pop-up Lateral) -->
+    <!-- PANEL DE ANALÍTICA -->
     <div id="analytics-panel" class="analytics-panel">
         <div class="flex justify-between items-center mb-8">
             <div>
@@ -39,122 +42,176 @@
         </div>
         
         <div class="space-y-6">
-            <!-- Gráfico 1: Distribución -->
             <div class="chart-container">
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Distribución de Activos</h3>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Distribución por Categoría</h3>
                 <canvas id="distributionChart"></canvas>
             </div>
 
-            <!-- Gráfico 2: Evolución -->
             <div class="chart-container">
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Proyección Mensual (Estimada)</h3>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Proyección a 6 Meses (2% mensual)</h3>
                 <canvas id="growthChart"></canvas>
             </div>
 
-            <!-- Resumen de Métricas -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
-                    <p class="text-[9px] font-black text-emerald-600 uppercase mb-1">Activo Mayor</p>
-                    <p id="top-asset" class="font-bold text-sm truncate">-</p>
-                </div>
-                <div class="p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20">
-                    <p class="text-[9px] font-black text-blue-600 uppercase mb-1">Diversificación</p>
-                    <p id="diversity-score" class="font-bold text-sm">-</p>
-                </div>
+            <div class="bento-card">
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Estado de Objetivos</h3>
+                <div id="goals-analytics" class="space-y-4"></div>
             </div>
         </div>
     </div>
 
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-6xl mx-auto">
         <header class="flex justify-between items-center mb-12">
             <div>
                 <h1 class="text-4xl font-black tracking-tighter italic">PASCU<span class="text-blue-600">FINANZAS</span></h1>
                 <p class="text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em]">Patrimonio & Estrategia</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="toggleAnalytics()" class="group relative w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-xl shadow-blue-600/30 hover:scale-105 transition-all">
+                <button onclick="toggleAnalytics()" class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-2xl shadow-xl shadow-blue-600/30 hover:scale-105 transition-all">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 </button>
                 <button onclick="document.documentElement.classList.toggle('dark')" class="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-2xl border border-slate-100 dark:border-slate-800 shadow-sm">🌓</button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bento-card col-span-1 md:col-span-2">
-                <h3 class="text-[10px] font-black text-blue-500 uppercase mb-4 tracking-widest">Nuevo Activo</h3>
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="asset-name" placeholder="Ej: Cuenta Ahorro, BTC, Acciones..." class="input-pro">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Registro de Activos -->
+            <div class="bento-card lg:col-span-2">
+                <h3 class="text-[10px] font-black text-blue-500 uppercase mb-4 tracking-widest text-center md:text-left">Nuevo Activo</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <select id="asset-category" class="input-pro font-bold">
+                        <option value="Bancos">🏦 Bancos</option>
+                        <option value="Bolsa">📈 Bolsa</option>
+                        <option value="Cripto">₿ Cripto</option>
+                    </select>
+                    <input type="text" id="asset-name" placeholder="Nombre (Ej: Santander)" class="input-pro">
                     <input type="number" id="asset-value" placeholder="Valor (€)" class="input-pro">
-                    <button onclick="addAsset()" class="bg-slate-900 dark:bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:opacity-90 transition-all">Añadir</button>
+                    <button onclick="addAsset()" class="bg-slate-900 dark:bg-blue-600 text-white rounded-xl font-bold hover:opacity-90 transition-all py-3">Añadir</button>
                 </div>
             </div>
-            <div class="bento-card flex flex-col justify-center">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Balance Total</h3>
+
+            <!-- Resumen Total -->
+            <div class="bento-card flex flex-col justify-center text-center">
+                <h3 class="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">Patrimonio Neto</h3>
                 <p id="total-val" class="text-4xl font-black text-slate-900 dark:text-white">0.00 €</p>
             </div>
         </div>
 
-        <div class="bento-card min-h-[400px]">
-            <div class="flex justify-between items-center mb-8">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Listado de Activos</h3>
-                <span id="asset-count" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full font-bold">0 ACTIVOS</span>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Listado Principal -->
+            <div class="bento-card lg:col-span-2">
+                <div class="flex justify-between items-center mb-8">
+                    <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                        <button onclick="switchTab('Todos')" class="tab-btn active" id="tab-Todos">Todos</button>
+                        <button onclick="switchTab('Bancos')" class="tab-btn" id="tab-Bancos">Bancos</button>
+                        <button onclick="switchTab('Bolsa')" class="tab-btn" id="tab-Bolsa">Bolsa</button>
+                        <button onclick="switchTab('Cripto')" class="tab-btn" id="tab-Cripto">Cripto</button>
+                    </div>
+                </div>
+                <div id="asset-list" class="space-y-3"></div>
             </div>
-            <div id="asset-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+
+            <!-- Columna Objetivos -->
+            <div class="space-y-6">
+                <div class="bento-card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Metas</h3>
+                        <button onclick="addGoalPrompt()" class="text-blue-600 font-black text-xl">+</button>
+                    </div>
+                    <div id="goals-list" class="space-y-6"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        let portfolio = JSON.parse(localStorage.getItem('pascu_assets')) || [];
+        let portfolio = JSON.parse(localStorage.getItem('pascu_assets_v2')) || [];
+        let goals = JSON.parse(localStorage.getItem('pascu_goals')) || [
+            { name: "Fondo de Emergencia", target: 10000 }
+        ];
+        let currentTab = 'Todos';
         let distChart, growthChart;
 
         function toggleAnalytics() { 
             const panel = document.getElementById('analytics-panel');
             panel.classList.toggle('open');
-            if(panel.classList.contains('open')) {
-                updateCharts();
-            }
+            if(panel.classList.contains('open')) updateCharts();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            render();
         }
 
         function render() {
             const list = document.getElementById('asset-list');
             const totalEl = document.getElementById('total-val');
-            const countEl = document.getElementById('asset-count');
             let total = 0;
             
-            list.innerHTML = portfolio.map((a, i) => {
-                total += a.val;
-                return `
-                    <div class="group flex justify-between items-center p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-blue-400 transition-all">
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">${a.name}</p>
-                            <p class="font-black text-xl">${a.val.toLocaleString()} <span class="text-sm font-normal text-slate-400">€</span></p>
+            // Calcular total real
+            portfolio.forEach(a => total += a.val);
+
+            // Filtrar y mostrar activos
+            const filtered = currentTab === 'Todos' ? portfolio : portfolio.filter(a => a.category === currentTab);
+            
+            list.innerHTML = filtered.map((a, i) => `
+                <div class="group flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 uppercase text-slate-500">${a.category}</span>
+                            <p class="font-bold text-slate-800 dark:text-slate-200">${a.name}</p>
                         </div>
-                        <button onclick="deleteAsset(${i})" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-all">✕</button>
                     </div>
-                `;
-            }).join('') || `
-                <div class="col-span-full py-20 text-center opacity-30">
-                    <p class="italic">Tu cartera está vacía</p>
+                    <div class="flex items-center gap-4">
+                        <p class="font-black text-lg">${a.val.toLocaleString()} €</p>
+                        <button onclick="deleteAsset(${i})" class="text-slate-300 hover:text-red-500 transition-colors">✕</button>
+                    </div>
                 </div>
-            `;
+            `).join('') || `<div class="py-10 text-center opacity-30 italic text-sm">Sin activos en esta categoría</div>`;
             
             totalEl.innerText = total.toLocaleString(undefined, {minimumFractionDigits: 2}) + " €";
-            countEl.innerText = `${portfolio.length} ACTIVOS`;
-            localStorage.setItem('pascu_assets', JSON.stringify(portfolio));
             
-            // Actualizar métricas rápidas
-            if(portfolio.length > 0) {
-                const max = portfolio.reduce((prev, current) => (prev.val > current.val) ? prev : current);
-                document.getElementById('top-asset').innerText = `${max.name} (${((max.val/total)*100).toFixed(1)}%)`;
-                document.getElementById('diversity-score').innerText = portfolio.length > 3 ? "Alta" : "Mejorable";
-            }
+            renderGoals(total);
+            
+            localStorage.setItem('pascu_assets_v2', JSON.stringify(portfolio));
+            localStorage.setItem('pascu_goals', JSON.stringify(goals));
+        }
+
+        function renderGoals(currentTotal) {
+            const container = document.getElementById('goals-list');
+            const analyticsContainer = document.getElementById('goals-analytics');
+            
+            const html = goals.map((g, i) => {
+                const progress = Math.min((currentTotal / g.target) * 100, 100);
+                return `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <p class="text-xs font-bold text-slate-700 dark:text-slate-300">${g.name}</p>
+                            <p class="text-[10px] font-black text-blue-600">${progress.toFixed(0)}%</p>
+                        </div>
+                        <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-600 transition-all duration-1000" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                            <span>0€</span>
+                            <button onclick="deleteGoal(${i})" class="hover:text-red-500">Eliminar meta</button>
+                            <span>${g.target.toLocaleString()}€</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html || `<p class="text-center py-4 text-xs opacity-40 italic text-slate-400">No hay metas definidas</p>`;
+            analyticsContainer.innerHTML = html;
         }
 
         function addAsset() {
+            const cat = document.getElementById('asset-category').value;
             const name = document.getElementById('asset-name').value.trim();
             const val = parseFloat(document.getElementById('asset-value').value);
             if (!name || isNaN(val)) return;
-            portfolio.push({ name, val });
+            portfolio.push({ category: cat, name, val });
             document.getElementById('asset-name').value = '';
             document.getElementById('asset-value').value = '';
             render();
@@ -165,55 +222,68 @@
             render();
         }
 
+        function addGoalPrompt() {
+            const name = prompt("Nombre del objetivo:");
+            const target = parseFloat(prompt("Cantidad meta (€):"));
+            if (name && !isNaN(target)) {
+                goals.push({ name, target });
+                render();
+            }
+        }
+
+        function deleteGoal(i) {
+            goals.splice(i, 1);
+            render();
+        }
+
         function updateCharts() {
             const ctxDist = document.getElementById('distributionChart').getContext('2d');
             const ctxGrowth = document.getElementById('growthChart').getContext('2d');
             
-            const labels = portfolio.map(a => a.name);
-            const data = portfolio.map(a => a.val);
+            const cats = ['Bancos', 'Bolsa', 'Cripto'];
+            const catData = cats.map(c => portfolio.filter(a => a.category === c).reduce((sum, curr) => sum + curr.val, 0));
+            
             const isDark = document.documentElement.classList.contains('dark');
             const textColor = isDark ? '#94a3b8' : '#64748b';
 
-            // Limpiar si ya existen
             if(distChart) distChart.destroy();
             if(growthChart) growthChart.destroy();
 
-            // Gráfico Circular de Distribución
             distChart = new Chart(ctxDist, {
                 type: 'doughnut',
                 data: {
-                    labels: labels,
+                    labels: cats,
                     datasets: [{
-                        data: data,
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'],
+                        data: catData,
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
                         borderWidth: 0,
-                        hoverOffset: 20
+                        hoverOffset: 15
                     }]
                 },
                 options: {
                     plugins: { 
                         legend: { position: 'bottom', labels: { color: textColor, font: { family: 'Outfit', weight: 'bold', size: 10 } } }
                     },
-                    cutout: '70%'
+                    cutout: '75%'
                 }
             });
 
-            // Gráfico Lineal de Crecimiento (Simulación)
-            const total = data.reduce((a, b) => a + b, 0);
-            const mockGrowth = Array.from({length: 6}, (_, i) => total * (1 + (i * 0.02))); // 2% crecimiento mensual estimado
+            const total = catData.reduce((a, b) => a + b, 0);
+            const mockGrowth = Array.from({length: 6}, (_, i) => total * Math.pow(1.02, i));
 
             growthChart = new Chart(ctxGrowth, {
                 type: 'line',
                 data: {
                     labels: ['Mes 1', 'Mes 2', 'Mes 3', 'Mes 4', 'Mes 5', 'Mes 6'],
                     datasets: [{
-                        label: 'Proyección 6 meses',
+                        label: 'Proyección',
                         data: mockGrowth,
                         borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
                         fill: true,
                         tension: 0.4,
-                        pointRadius: 0
+                        pointRadius: 4,
+                        pointBackgroundColor: '#3b82f6'
                     }]
                 },
                 options: {
